@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<launch>
+ <!-- spawn the gazebo world if in case we have custom place for world update the world value with appropriate path-->
+  <arg name="gui" default="true"/>
+  <arg name="world" default="$(find mavlink_sitl_gazebo)/worlds/windy.world"/>
+  <arg name="debug" default="false"/>
+  <arg name="verbose" default="false"/>
+  <arg name="paused" default="false"/>
+  <!-- Gazebo sim -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="gui" value="$(arg gui)"/>
+        <arg name="world_name" value="$(arg world)"/>
+        <arg name="debug" value="$(arg debug)"/>
+        <arg name="verbose" value="$(arg verbose)"/>
+        <arg name="paused" value="$(arg paused)"/>
+  </include>
+  
+</launch>

@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="uav_name" default="iris_0"/>
+    <arg name="uav_type" default="iris"/>
+    <arg name="ID" default="0"/>
+    <arg name="module" default="1"/> <!--Module number to spawn appropriate nodes accordingly-->
+    <arg name="pose_x" default="0"/>
+    <arg name="pose_y" default="0"/>
+    <arg name="pose_z" default="0"/>
+
+    <group ns="$(arg uav_name)">
+        <!-- MAVROS and vehicle configs -->
+        <arg name="remote_port" value="$(eval 14540 + ID)"/>
+        <arg name="host_port" value="$(eval 14580 + ID  )"/>
+
+        <arg name="fcu_url" default="$(eval 'udp://:' + str(remote_port) + '@localhost:' + str(host_port))"/>
+        <!-- PX4 SITL and vehicle spawn -->
+        <include file="$(find px4)/launch/single_vehicle_spawn.launch">
+            <arg name="x" value="$(arg pose_x)"/>
+            <arg name="y" value="$(arg pose_y)"/>
+            <arg name="z" value="$(arg pose_z)"/>
+            <arg name="R" value="0"/>
+            <arg name="P" value="0"/>
+            <arg name="Y" value="0"/>
+            <arg name="vehicle" value="$(arg uav_type)"/>
+            <arg name="mavlink_udp_port" value="$(eval 14560 + ID)"/>
+            <arg name="mavlink_tcp_port" value="$(eval 4560 +ID)"/>
+            <arg name="ID" value="$(arg ID)"/>
+        </include>
+        <!-- MAVROS -->
+        <include file="$(find mavros)/launch/px4.launch">
+            <arg name="fcu_url" value="$(arg fcu_url)"/>
+            <arg name="gcs_url" value=""/>
+            <arg name="tgt_system" value="$(eval 1 + arg('ID'))"/>
+            <arg name="tgt_component" value="1"/>
+        </include>
+
+        <group if="$(eval arg('module') == 1)">
+            <node pkg="mavros_bridge" type="offboard_node" name="offboard_node" output="screen"/>
+        </group>
+        
+    </group>
+</launch>
