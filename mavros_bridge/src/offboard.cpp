@@ -43,8 +43,13 @@ int main(int argc, char **argv)
     mavros_msgs::SetMode offb_set_mode;
     offb_set_mode.request.custom_mode = "OFFBOARD";
 
+    //Mavros msg used to arm 
+    mavros_msgs::CommandBool arm_cmd;
+    arm_cmd.request.value = true;
 
-    //Goal point  w.r.t local frame
+    /* set the goal position of the drone.
+    The location is with respect to the local frame which is relative to the starting point of the drone.
+    */
     geometry_msgs::PoseStamped pose;
     pose.pose.position.x = 0;
     pose.pose.position.y = 0;
@@ -54,10 +59,8 @@ int main(int argc, char **argv)
     ros::Time last_request = ros::Time::now();
 
     while(ros::ok()){
-        /*
-        Set the drone to offboard mode for controlling in the autonomous mode 
-        -> Current drone mode is published in /mavros/state 
-        */
+
+        //set the drone mode to offboard mode 
         if( current_state.mode != "OFFBOARD" &&
             (ros::Time::now() - last_request > ros::Duration(5.0))){
             if( set_mode_client.call(offb_set_mode) &&
@@ -65,8 +68,10 @@ int main(int argc, char **argv)
                 ROS_INFO("Offboard enabled");
             }
             last_request = ros::Time::now();
-        } else {
-            // once the drone is in offboard mode we can arm the drone
+
+        } 
+        else {
+            // Once the drone is in offboard mode arm the drone 
             if( !current_state.armed &&
                 (ros::Time::now() - last_request > ros::Duration(5.0))){
                 if( arming_client.call(arm_cmd) &&
@@ -76,8 +81,8 @@ int main(int argc, char **argv)
                 last_request = ros::Time::now();
             }
         }
-
-        local_pos_pub.publish(pose); // publish the goal point 
+        // publish the goal point at desired rate 
+        local_pos_pub.publish(pose);
 
         ros::spinOnce();
         rate.sleep();
