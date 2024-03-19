@@ -43,17 +43,13 @@ int main(int argc, char **argv)
     mavros_msgs::SetMode offb_set_mode;
     offb_set_mode.request.custom_mode = "OFFBOARD";
 
-    //Mavros msg used to arm 
-    mavros_msgs::CommandBool arm_cmd;
-    arm_cmd.request.value = true;
-
     /* set the goal position of the drone.
     The location is with respect to the local frame which is relative to the starting point of the drone.
     */
     geometry_msgs::PoseStamped pose;
     pose.pose.position.x = 0;
     pose.pose.position.y = 0;
-    pose.pose.position.z = 2;
+    pose.pose.position.z = 1.5;
 
 
     ros::Time last_request = ros::Time::now();

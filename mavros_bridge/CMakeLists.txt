@@ -89,4 +89,8 @@ include_directories(
 )
 
 add_executable(offboard_node src/offboard.cpp)
+add_executable(velpub src/velocity.cpp)
+
 target_link_libraries(offboard_node ${catkin_LIBRARIES})
+target_link_libraries(velpub ${catkin_LIBRARIES})
+
