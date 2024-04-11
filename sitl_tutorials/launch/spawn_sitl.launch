@@ -36,11 +36,11 @@
         </include>
 
         <group if="$(eval arg('module') == 1)">
-            <node pkg="mavros_bridge" type="offboard_node" name="offboard_node" output="screen"/>
+            <node pkg="sitl_tutorials" type="offboard_node" name="offboard_node" output="screen"/>
         </group>
         
         <group if="$(eval arg('module') == 2)">
-            <node pkg="mavros_bridge" type="velpub" name="velpub" output="screen"/>
+            <node pkg="sitl_tutorials" type="velpub" name="velpub" output="screen"/>
         </group>
         
     </group>
