@@ -1,12 +1,14 @@
 <?xml version="1.0"?>
 <launch>
-    <arg name="uav_name" default="iris_0"/>
-    <arg name="uav_type" default="iris"/>
-    <arg name="ID" default="0"/>
-    <arg name="module" default="1"/> <!--Module number to spawn appropriate nodes accordingly-->
-    <arg name="pose_x" default="0"/>
-    <arg name="pose_y" default="0"/>
-    <arg name="pose_z" default="0"/>
+
+    <arg name="uav_name" default="iris_0"/> <!-- Name of the UAV -->
+    <arg name="uav_type" default="iris"/> <!-- Type of UAV, e.g., iris, plane,vtol -->
+    <arg name="ID" default="0"/> <!-- Unique identifier for the UAV -->
+    <arg name="module" default="1"/> <!-- Module number to spawn appropriate nodes accordingly -->
+    <arg name="pose_x" default="0"/> <!-- Initial x-coordinate position of the UAV -->
+    <arg name="pose_y" default="0"/> <!-- Initial y-coordinate position of the UAV -->
+    <arg name="pose_z" default="0"/> <!-- Initial z-coordinate position of the UAV -->
+
 
     <group ns="$(arg uav_name)">
         <!-- MAVROS and vehicle configs -->
@@ -23,9 +25,9 @@
             <arg name="P" value="0"/>
             <arg name="Y" value="0"/>
             <arg name="vehicle" value="$(arg uav_type)"/>
-            <arg name="mavlink_udp_port" value="$(eval 14560 + ID)"/>
-            <arg name="mavlink_tcp_port" value="$(eval 4560 +ID)"/>
-            <arg name="ID" value="$(arg ID)"/>
+            <arg name="mavlink_udp_port" value="$(eval 14560 + ID)"/> <!-- MAVLink UDP port -->
+            <arg name="mavlink_tcp_port" value="$(eval 4560 + ID)"/> <!-- MAVLink TCP port -->
+            <arg name="ID" value="$(arg ID)"/> <!-- UAV's ID -->
         </include>
         <!-- MAVROS -->
         <include file="$(find mavros)/launch/px4.launch">

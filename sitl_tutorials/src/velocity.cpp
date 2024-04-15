@@ -23,9 +23,6 @@ void keyboard_teleop_callback(const geometry_msgs::Twist::ConstPtr& msg){
 int main(int argc, char **argv)
 {
 
-	velocity.twist.linear.x = 0;
-	velocity.twist.linear.y = 0;
-	velocity.twist.linear.z = -1;
 	ros::init( argc, argv, "keyboard_node");
 	ros::NodeHandle nh;
 
@@ -37,7 +34,6 @@ int main(int argc, char **argv)
 	ros::Publisher velocity_pub = nh.advertise<geometry_msgs::Twist>("mavros/setpoint_velocity/cmd_vel_unstamped",10);
 
 	// client
-	ros::ServiceClient frame_client = nh.serviceClient<mavros_msgs::SetMavFrame>("mavros/setpoint_velocity/mav_frame");
 	ros::ServiceClient arming_client = nh.serviceClient<mavros_msgs::CommandBool>("mavros/cmd/arming");
 	ros::ServiceClient set_mode_client = nh.serviceClient<mavros_msgs::SetMode>("mavros/set_mode");
 
@@ -49,23 +45,16 @@ int main(int argc, char **argv)
 		ros::spinOnce();
 		rate.sleep();
 	}
-	ROS_INFO("FCU connected");
 
-	// Change from FRAME_LOCAL_NED to FRAME_BODY_NED
-	mavros_msgs::SetMavFrame frame_id;
-	frame_id.request.mav_frame = 8;
+	keyboard_cmd_vel.linear.x= 0;
+	keyboard_cmd_vel.linear.y= 0;
+	keyboard_cmd_vel.linear.z= 0;
 
-	// send a few setpoints before starting
-	for( int i = 100; ros::ok() && i > 0; --i){
-		velocity.header.stamp = ros::Time::now();
-		velocity_pub.publish(velocity);
-		ros::spinOnce();
-		rate.sleep();
-	}
-
+    //mavros msg for setting the mode
 	mavros_msgs::SetMode offb_set_mode;
 	offb_set_mode.request.custom_mode = "OFFBOARD";
 
+    //mavros msg for arming
 	mavros_msgs::CommandBool arm_cmd;
 	arm_cmd.request.value = true;
 
