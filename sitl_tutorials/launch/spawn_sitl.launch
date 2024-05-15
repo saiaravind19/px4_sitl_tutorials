@@ -44,6 +44,10 @@
         <group if="$(eval arg('module') == 2)">
             <node pkg="sitl_tutorials" type="velpub" name="velpub" output="screen"/>
         </group>
+        <group if="$(eval arg('module') == 3)">
+            <node pkg="goal_allocator" type="position_controller" name="position_controller" output="screen"/>
+        </group>
+        
         
     </group>
 </launch>

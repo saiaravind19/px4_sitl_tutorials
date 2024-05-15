@@ -1,0 +1,3 @@
+geographic_msgs/GeoPoseStamped goal
+---
+std_msgs/Bool status
