@@ -61,9 +61,10 @@ void Position_control::state_cb(const mavros_msgs::State::ConstPtr& msg){
 bool Position_control::update_goal_service_callback(goal_allocator::goal::Request  &req,goal_allocator::goal::Response &res){
 
     res.status.data = true;
+    local_goal_pose.pose.position.x= req.goal.x;
+    local_goal_pose.pose.position.y= req.goal.y;
+    local_goal_pose.pose.position.z= req.goal.z;
 
-    global_goal_pose.pose.position.latitude = req.goal.pose.position.latitude;
-    global_goal_pose.pose.position.longitude = req.goal.pose.position.longitude;
     ROS_INFO("Received request for global pose update");
     return true;
 }

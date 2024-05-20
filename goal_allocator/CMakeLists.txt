@@ -10,6 +10,7 @@ project(goal_allocator)
 find_package(catkin REQUIRED COMPONENTS
   mavros
   roscpp
+  rospy
 
   std_msgs
   geometry_msgs

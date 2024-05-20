@@ -2,7 +2,7 @@
 
 read -p "Please enter number of drones to be spawned: " user_input
 user_input=${user_input:-10}
-module=1
+module=3
 namespace="iris_"
 counter=0
 pose_x=0
@@ -37,7 +37,7 @@ do
     do 
         # Check if the counter is within the specified range
         if [ $counter -lt $user_input ]; then
-            roslaunch --wait sitl_tutorials spawn_sitl.launch ID:=$((counter+=2)) pose_x:=$((pose_x * 5)) pose_y:=$((i * 5)) uav_name:="${namespace}${counter}" module:=$module &
+            roslaunch --wait sitl_tutorials spawn_sitl.launch ID:=$((counter+=100)) pose_x:=$((pose_x * 5)) pose_y:=$((i * 5)) uav_name:="${namespace}${counter}" module:=$module &
             process_list+=" $!"
             sleep 5
         fi

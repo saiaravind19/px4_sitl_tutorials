@@ -1,9 +1,12 @@
-import sys
-from PyQt5.QtWidgets import QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QLabel, QFileDialog, QMessageBox, QTextEdit, QSizePolicy
-from PyQt5.QtGui import QPixmap
-from PyQt5.QtCore import Qt
+#!/usr/bin/env python
 
-class MissionControl(QWidget):
+from PyQt5.QtWidgets import QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QLabel, QFileDialog, QMessageBox, QTextEdit, QSizePolicy
+from PyQt5.QtGui import QPixmap,QImage
+from PyQt5.QtCore import Qt
+from allocator import GoalAllocator
+from image_segmentation import edgeDetector
+import cv2
+class MissionControl(QWidget,GoalAllocator):
     def __init__(self):
         super().__init__()
         self.initUI()
@@ -44,10 +47,14 @@ class MissionControl(QWidget):
     def load_image(self):
         file_path, _ = QFileDialog.getOpenFileName(self, "Open Image File", "", "Image Files (*.png *.jpg *.jpeg *.bmp)")
         if file_path:
-            pixmap = QPixmap(file_path)
-            resized_pixmap = pixmap.scaled(640, 480, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-            self.image_label.setPixmap(resized_pixmap)
+            processed_img,points = edgeDetector.process_image(file_path)
+
+            self.map_goal_point([480,480],points)
+            resized = cv2.resize(processed_img, (480,480), interpolation = cv2.INTER_AREA)
             
+            qimg = QImage(resized.data, resized.shape[1], resized.shape[0],QImage.Format_Grayscale8)
+            pixmap = QPixmap.fromImage(qimg)
+            self.image_label.setPixmap(pixmap)
             self.log_message("Image loaded")
         else:
             self.log_message("Image not loaded")
@@ -55,6 +62,7 @@ class MissionControl(QWidget):
 
     def execute_mission(self):
         # Your mission execution code goes here
+        self.execuite_formation()
         self.log_message("Mission executed!")
 
     def show_message(self, title, text, icon):
