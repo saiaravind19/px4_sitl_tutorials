@@ -82,20 +82,20 @@ class MissionControl(QWidget, GoalAllocator):
         drone_area_group = QGroupBox("Drone Show Mapping Area")
         drone_area_layout = QFormLayout()
         
-        self.min_x_input = QSpinBox(self.config_tab)
-        self.min_x_input.setRange(0, 50)
-        self.min_x_input.setValue(3)  # Default value
-        drone_area_layout.addRow("Min X:", self.min_x_input)
+        self.min_z_input = QSpinBox(self.config_tab)
+        self.min_z_input.setRange(0, 50)
+        self.min_z_input.setValue(0)  # Default value
+        drone_area_layout.addRow("Min z:", self.min_z_input)
 
         self.min_y_input = QSpinBox(self.config_tab)
         self.min_y_input.setRange(0, 50)
-        self.min_y_input.setValue(0)  # Default value
+        self.min_y_input.setValue(3)  # Default value
         drone_area_layout.addRow("Min Y:", self.min_y_input)
 
-        self.max_x_input = QSpinBox(self.config_tab)
-        self.max_x_input.setRange(0, 1000)
-        self.max_x_input.setValue(50)  # Default value
-        drone_area_layout.addRow("Max X:", self.max_x_input)
+        self.max_z_input = QSpinBox(self.config_tab)
+        self.max_z_input.setRange(0, 1000)
+        self.max_z_input.setValue(50)  # Default value
+        drone_area_layout.addRow("Max Z", self.max_z_input)
 
         self.max_y_input = QSpinBox(self.config_tab)
         self.max_y_input.setRange(0, 1000)
@@ -124,7 +124,7 @@ class MissionControl(QWidget, GoalAllocator):
 
         if self.image_path:
             processed_img, points = edgeDetector.process_image(self.image_path, self.get_drone_number())
-            self.map_goal_point([processed_img.shape[0],processed_img.shape[1]], points)
+            self.map_goal_point([480, 480], points)
             resized = cv2.resize(processed_img, (480, 480), interpolation=cv2.INTER_AREA)
             
             qimg = QImage(resized.data, resized.shape[1], resized.shape[0], QImage.Format_Grayscale8)
@@ -153,21 +153,21 @@ class MissionControl(QWidget, GoalAllocator):
     def set_config(self):
         # Retrieve values from inputs and log the config settings
         num_drones = self.num_drones_input.value()
-        min_x = self.min_x_input.value()
+        min_z = self.min_z_input.value()
         min_y = self.min_y_input.value()
-        max_x = self.max_x_input.value()
+        max_z = self.max_z_input.value()
         max_y = self.max_y_input.value()
             
 
         # Log the configuration
-        self.log_message("Config set! Number of Drones:{} Min bound: {}, {} Max bound: {}, {}".format(num_drones, min_x, min_y, max_x, max_y))
+        self.log_message("Config set! Number of Drones:{} Min bound: {}, {} Max bound: {}, {}".format(num_drones, min_z, min_y, max_z, max_y))
         
         # Update internal state if necessary
         self.set_drone_number(num_drones)
-        self.set_min_bound([min_x, min_y])
-        self.set_max_bound([max_x, max_y])
+        self.set_min_bound([min_y,min_z])
+        self.set_max_bound([max_y,max_z])
 
-        if self.current_state == stateMachine.IMAGE_LOADED:
+        if self.current_state == stateMachine.IMAGE_LOADED or self.current_state == stateMachine.EXECUITE:
             self.load_image(self.image_path)
 
 

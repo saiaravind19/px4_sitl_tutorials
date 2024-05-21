@@ -93,10 +93,7 @@ class GoalAllocator():
                         queue_size= 10
                     )
                 )
-        
-        for drone in self.namespace:
-            if drone not in self.drone_pose_dict:
-                self.drone_pose_dict[drone] = drone_state()
+
                 self.drone_home_subscriber[drone]= rospy.Subscriber(
                         drone + '/mavros/home_position/home',
                         HomePosition,
@@ -131,6 +128,8 @@ class GoalAllocator():
     def compute_localcoordinate(self) -> None:
         for drone in self.drone_pose_dict:
             self.drone_pose_dict[drone].global2local_transformation = self.gps_to_enu(self.global_home_pose,self.drone_pose_dict[drone].drone_home_pose)
+            rospy.loginfo("set home trans Drone: %s : x: %.2f , y: %.2f , z : %.2f",drone,self.drone_pose_dict[drone].global2local_transformation.x,self.drone_pose_dict[drone].global2local_transformation.y,self.drone_pose_dict[drone].global2local_transformation.z)
+
     
     def home_pose_callback(self, msg :HomePosition, drone_id :str) -> None:
         #get the home position and unregister the subscriber callback
@@ -144,12 +143,11 @@ class GoalAllocator():
 
     # scalling from image to 50x50 area 
     def map_goal_point(self,shape : list ,goal_points : list) -> None:
-
         self.goal_point_list = [] # empty the goal point when execuit is pressed
         for point in goal_points:
             scalled_point = Point()
-            scalled_point.x = self.__min_bound[0]+(point[1]/shape[1])*self.__max_bound[0]
-            scalled_point.y = self.__min_bound[1]+(point[0]/shape[0])*self.__max_bound[1]
+            scalled_point.x = self.__min_bound[0]+(point[1]/shape[0])*self.__max_bound[0]
+            scalled_point.y = self.__min_bound[1]+(point[0]/shape[1])*self.__max_bound[1]
             scalled_point.z = 0 
             self.goal_point_list.append(self.transform_to_yz(scalled_point))
         
