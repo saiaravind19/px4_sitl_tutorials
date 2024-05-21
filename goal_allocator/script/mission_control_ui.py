@@ -5,8 +5,8 @@ from PyQt5.QtWidgets import (QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QLa
                              QTabWidget, QFormLayout, QSpinBox, QGroupBox)
 from PyQt5.QtGui import QPixmap, QImage
 from PyQt5.QtCore import Qt
-from .utils.allocator import GoalAllocator
-from .utils.image_segmentation import edgeDetector
+from utils.allocator import GoalAllocator
+from utils.image_segmentation import edgeDetector
 import cv2
 
 class stateMachine():
