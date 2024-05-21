@@ -11,7 +11,7 @@ class edgeDetector():
         return points[indices]
     
     @staticmethod
-    def process_image(image_path : str):
+    def process_image(image_path : str,num_points : int):
         # Read the image
         image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
         flipped_img = cv2.flip(image,0)
@@ -24,10 +24,8 @@ class edgeDetector():
 
         # Function to select equally spaced points
         # Number of points you want to sample
-        num_points = 4
         equally_spaced_points = edgeDetector.get_equally_spaced_points(edge_points, num_points)
         equally_spaced_swapped = []
-        print(equally_spaced_points)
         for point in equally_spaced_points:
             cv2.circle(edges, tuple(point[::-1]), 2, (255, 0, 0), 2)  # Draw a red circle at each point
             equally_spaced_swapped.append(point[::-1])
