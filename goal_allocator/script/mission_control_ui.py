@@ -10,11 +10,19 @@ from utils.image_segmentation import edgeDetector
 import cv2
 
 class stateMachine():
+    """
+    A simple state machine to manage the state of the Mission Control application.
+    """
+   
     INIT_UI=1
     LOAD_CONFIG =2
     IMAGE_LOADED = 3
     EXECUITE =4
 class MissionControl(QWidget, GoalAllocator):
+    """
+    Main class for the Mission Control application. Inherits from QWidget for GUI and GoalAllocator for goal management.
+    """
+
     def __init__(self):
         super().__init__()
         self.current_state = stateMachine.INIT_UI
@@ -22,6 +30,9 @@ class MissionControl(QWidget, GoalAllocator):
         self.initUI()        
 
     def initUI(self):
+        """
+        Initialize the user interface with tabs and layouts.
+        """
         self.setWindowTitle("Mission Control")
         
         self.tabs = QTabWidget()
@@ -41,6 +52,9 @@ class MissionControl(QWidget, GoalAllocator):
         self.setLayout(main_layout)
 
     def initMainTab(self):
+        """
+        Initialize the Main tab with image display, buttons, and log area.
+        """
         self.image_label = QLabel(self.main_tab)
 
         self.load_button = QPushButton("Load Image", self.main_tab)
@@ -70,6 +84,10 @@ class MissionControl(QWidget, GoalAllocator):
         self.main_tab.setLayout(main_tab_layout)
 
     def initConfigTab(self):
+        """
+        Initialize the Config tab with input fields for configuring drone settings.
+        """
+
         layout = QVBoxLayout()
         
         num_drones_layout = QFormLayout()
@@ -115,7 +133,12 @@ class MissionControl(QWidget, GoalAllocator):
         self.config_tab.setLayout(layout)
 
     def load_image(self,image_path = str):
+        """
+        Loads and processes an image for the mission.
 
+        Args:
+            image_path (str): Path to the image file. If "None", a file dialog is opened.
+        """
         if image_path == "None":
             self.image_path, _ = QFileDialog.getOpenFileName(self, "Open Image File", "", "Image Files (*.png *.jpg *.jpeg *.bmp)")
             self.current_state = stateMachine.LOAD_CONFIG
@@ -137,6 +160,10 @@ class MissionControl(QWidget, GoalAllocator):
             self.log_message("Image not loaded")
 
     def execute_mission(self):
+        """
+        Executes the mission by assigning goals to drones and sending the goals.
+        """
+
         if (self.current_state == stateMachine.IMAGE_LOADED or self.current_state == stateMachine.EXECUITE)    and self.get_current_drone_count() == self.get_drone_number():
             self.current_state = stateMachine.EXECUITE
             self.update_subscribers()
@@ -151,15 +178,15 @@ class MissionControl(QWidget, GoalAllocator):
 
 
     def set_config(self):
-        # Retrieve values from inputs and log the config settings
+        """
+        Sets the configuration for the mission based on user input.
+        """
         num_drones = self.num_drones_input.value()
         min_z = self.min_z_input.value()
         min_y = self.min_y_input.value()
         max_z = self.max_z_input.value()
         max_y = self.max_y_input.value()
             
-
-        # Log the configuration
         self.log_message("Config set! Number of Drones:{} Min bound: {}, {} Max bound: {}, {}".format(num_drones, min_z, min_y, max_z, max_y))
         
         # Update internal state if necessary
@@ -172,6 +199,15 @@ class MissionControl(QWidget, GoalAllocator):
 
 
     def show_message(self, title, text, icon):
+        """
+        Displays a message box with the given title, text, and icon.
+
+        Args:
+            title (str): Title of the message box.
+            text (str): Text content of the message.
+            icon (QMessageBox.Icon): Icon to be displayed in the message box.
+        """
+       
         msg = QMessageBox()
         msg.setWindowTitle(title)
         msg.setText(text)
