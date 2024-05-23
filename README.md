@@ -17,3 +17,8 @@ For a detailed explanation on how to get started with the basics of PX4, please 
     - Setting user defined configuration in run time.
     - Drone formation depecting the image input given by the user.
 - Utilize a bash script to effortlessly spawn Multiple drones within the Gazebo simulation environment.
+
+
+.. raw:: html
+
+   <iframe width="700" height="400" src="https://www.youtube.com/embed/TD-ApT3Auv8?si=-K3mzTEWhaaRDfov" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
