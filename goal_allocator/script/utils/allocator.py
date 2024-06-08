@@ -101,7 +101,7 @@ class GoalAllocator():
         self.namespace = [topic.split('/')[1] for topic in local_pose_odom_list if len(topic.split('/')) > 4]
         for drone in self.namespace:
             if drone not in self.drone_pose_dict:
-                self.drone_pose_dict[drone] = DroneState()
+                self.drone_pose_dict[drone] = drone_state()
                 self.local_pose_subscriber.append(
                     rospy.Subscriber(
                         drone + '/mavros/local_position/odom',
