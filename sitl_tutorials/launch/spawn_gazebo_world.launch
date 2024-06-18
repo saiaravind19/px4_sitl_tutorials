@@ -2,7 +2,7 @@
 <launch>
  <!-- spawn the gazebo world if in case we have custom place for world update the world value with appropriate path-->
   <arg name="gui" default="true"/>
-  <arg name="world" default="$(find mavlink_sitl_gazebo)/worlds/emempty_worldpty.world"/>
+  <arg name="world" default="$(find mavlink_sitl_gazebo)/worlds/empty_world.world"/>
   <arg name="debug" default="false"/>
   <arg name="verbose" default="false"/>
   <arg name="paused" default="false"/>

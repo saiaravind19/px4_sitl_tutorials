@@ -2,7 +2,7 @@
 
 read -p "Please enter number of drones to be spawned: " user_input
 user_input=${user_input:-10}
-module=3
+module=4
 namespace="iris_"
 counter=0
 pose_x=0

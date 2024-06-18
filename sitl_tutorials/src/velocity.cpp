@@ -17,6 +17,9 @@ void state_cb(const mavros_msgs::State::ConstPtr& msg){
 
 // Callback function for keyboard input
 void keyboard_teleop_callback(const geometry_msgs::Twist::ConstPtr& msg){
+	velocity.header.stamp = ros::Time::now();
+	velocity.twist.linear = msg->linear;
+	velocity.twist.angular = msg->angular;
 	keyboard_cmd_vel = *msg;
 }
 
@@ -31,7 +34,7 @@ int main(int argc, char **argv)
 	ros::Subscriber keyboard_sub = nh.subscribe<geometry_msgs::Twist>("/cmd_vel",10, keyboard_teleop_callback);
 	
 	// publisher
-	ros::Publisher velocity_pub = nh.advertise<geometry_msgs::Twist>("mavros/setpoint_velocity/cmd_vel_unstamped",10);
+	ros::Publisher velocity_pub = nh.advertise<geometry_msgs::TwistStamped>("mavros/setpoint_velocity/cmd_vel",10);
 
 	// client
 	ros::ServiceClient arming_client = nh.serviceClient<mavros_msgs::CommandBool>("mavros/cmd/arming");
@@ -71,7 +74,7 @@ int main(int argc, char **argv)
 		}
 		else
 		{
-			if( !current_state.armed && (ros::Time::now() -last_request > ros::Duration(5.0)))
+			if( !current_state.armed && (ros::Time::now() -last_request > ros::Duration(5.0)) && current_state.mode == "OFFBOARD")
 			{
 				if( arming_client.call(arm_cmd) && arm_cmd.response.success)
 				{
@@ -80,7 +83,7 @@ int main(int argc, char **argv)
 				last_request = ros::Time::now();
 			}
 		}
-		velocity_pub.publish(keyboard_cmd_vel); 
+		velocity_pub.publish(velocity); 
 		ros::spinOnce();
 		rate.sleep();
 	}

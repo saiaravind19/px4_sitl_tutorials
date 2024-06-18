@@ -166,7 +166,6 @@ class MissionControl(QWidget, GoalAllocator):
 
         if (self.current_state == stateMachine.IMAGE_LOADED or self.current_state == stateMachine.EXECUITE)    and self.get_current_drone_count() == self.get_drone_number():
             self.current_state = stateMachine.EXECUITE
-            self.update_subscribers()
             self.execute_formation()
             self.log_message("Mission executed")
             

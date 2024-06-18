@@ -47,7 +47,20 @@ class GoalAllocator():
         
         self.drone_home_subscriber = {}
         self.goal_point_list = []
+        self.drone_home_publisher = {}
         self.goal_allocator_service = {}
+        
+        self.drone_home_timer = rospy.Timer(rospy.Duration(2), self.home_pose_publisher)
+        self.update_home_timer  = rospy.Timer(rospy.Duration(5), self.update_subscribers)
+
+
+    def home_pose_publisher(self,event):
+        local_home_transform = Point()
+        for drone in self.drone_home_publisher:
+            if drone in self.drone_pose_dict:
+                local_home_transform = self.drone_pose_dict[drone].global2local_transformation
+                self.drone_home_publisher[drone].publish(local_home_transform)
+
 
     def set_min_bound(self, bound: list) -> None:
         """
@@ -87,19 +100,18 @@ class GoalAllocator():
         namespace = [topic.split('/')[1] for topic in local_pose_odom_list if len(topic.split('/')) > 4]
         return len(namespace)
     
-    def update_subscribers(self) -> None:
+    def update_subscribers(self,event) -> None:
         """
         Update subscribers for local positions and home positions of drones.
         """
         topic_list = rospy.get_published_topics()
-        self.namespace = []
-
+    
         # Get the local pose topic with namespaces
         local_pose_odom_list = [topic_name[0] for topic_name in topic_list if '/mavros/local_position/odom' in topic_name[0]]
         
         # Extract the namespaces from the list
-        self.namespace = [topic.split('/')[1] for topic in local_pose_odom_list if len(topic.split('/')) > 4]
-        for drone in self.namespace:
+        namespace = [topic.split('/')[1] for topic in local_pose_odom_list if len(topic.split('/')) > 4]
+        for drone in namespace:
             if drone not in self.drone_pose_dict:
                 self.drone_pose_dict[drone] = drone_state()
                 self.local_pose_subscriber.append(
@@ -117,18 +129,19 @@ class GoalAllocator():
                     lambda msg, drone=drone: self.home_pose_callback(msg, drone),
                     queue_size=5
                 )
+                self.drone_home_publisher[drone] = rospy.Publisher(drone + '/local_home_transform',Point,queue_size=10)
         
         rate = rospy.Rate(50)
         while len(self.drone_home_subscriber) != 0:
             rate.sleep()
         
-        for drone in self.namespace:
+        for drone in namespace:
             if drone not in self.goal_allocator_service:
                 self.goal_allocator_service[drone] = rospy.ServiceProxy(
                     '/' + drone + '/goal_update',
                     goal
                 )
-        
+        self.namespace = namespace
         self.global_home_pose = self.drone_pose_dict[self.namespace[0]].drone_home_pose
         self.compute_localcoordinate()
 
