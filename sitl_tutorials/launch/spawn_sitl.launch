@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <launch>
-
+    
+    <env name="ROSCONSOLE_FORMAT" value="[${severity}] [${walltime:%H:%M:%S}] [${node}] [${function}]:${message}"/>
     <arg name="uav_name" default="iris_0"/> <!-- Name of the UAV -->
     <arg name="uav_type" default="iris"/> <!-- Type of UAV, e.g., iris, plane,vtol -->
     <arg name="ID" default="0"/> <!-- Unique identifier for the UAV -->
@@ -9,7 +10,7 @@
     <arg name="pose_y" default="0"/> <!-- Initial y-coordinate position of the UAV -->
     <arg name="pose_z" default="0"/> <!-- Initial z-coordinate position of the UAV -->
 
-
+    
     <group ns="$(arg uav_name)">
         <!-- MAVROS and vehicle configs -->
         <arg name="remote_port" value="$(eval 14540 + ID)"/>
@@ -44,8 +45,11 @@
         <group if="$(eval arg('module') == 2)">
             <node pkg="sitl_tutorials" type="velpub" name="velpub" output="screen"/>
         </group>
+
         <group if="$(eval arg('module') == 3)">
-            <node pkg="goal_allocator" type="position_controller" name="position_controller" output="screen"/>
+            <node pkg="goal_allocator" type="state_manager" name="state_manager" output="screen"/>
+            <node pkg="collision_avoidance" type="collision_avoidance_node" name="collision_avoidance_node" output="screen"/>
+
         </group>
         
         

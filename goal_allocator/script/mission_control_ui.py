@@ -15,9 +15,11 @@ class stateMachine():
     """
    
     INIT_UI=1
-    LOAD_CONFIG =2
-    IMAGE_LOADED = 3
-    EXECUITE =4
+    ARM = 2
+    LOAD_CONFIG =3
+    IMAGE_LOADED = 4
+    EXECUITE =5
+
 class MissionControl(QWidget, GoalAllocator):
     """
     Main class for the Mission Control application. Inherits from QWidget for GUI and GoalAllocator for goal management.
@@ -57,6 +59,9 @@ class MissionControl(QWidget, GoalAllocator):
         """
         self.image_label = QLabel(self.main_tab)
 
+        self.arm_button = QPushButton("Arm", self.main_tab)
+        self.arm_button.clicked.connect(self.arm_drones)
+
         self.load_button = QPushButton("Load Image", self.main_tab)
         self.load_button.clicked.connect(lambda: self.load_image("None"))
 
@@ -65,14 +70,15 @@ class MissionControl(QWidget, GoalAllocator):
 
         button_layout = QHBoxLayout()
         button_layout.setContentsMargins(0, 0, 0, 0)
-        button_layout.addWidget(self.load_button)
-        button_layout.addWidget(self.execute_button)
+        button_layout.addWidget(self.arm_button)          # Arm button first
+        button_layout.addWidget(self.load_button)         # Load Image button second
+        button_layout.addWidget(self.execute_button)      # Execute Mission button third
 
         self.log_textedit = QTextEdit(self.main_tab)
         self.log_textedit.setReadOnly(True)
         self.log_textedit.setFixedHeight(75)
         self.log_textedit.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        
+
         textbox_layout = QVBoxLayout()
         textbox_layout.addWidget(self.image_label)
         textbox_layout.addWidget(self.log_textedit)
@@ -80,8 +86,9 @@ class MissionControl(QWidget, GoalAllocator):
         main_tab_layout = QVBoxLayout()
         main_tab_layout.addLayout(button_layout)
         main_tab_layout.addLayout(textbox_layout)
-        
+
         self.main_tab.setLayout(main_tab_layout)
+
 
     def initConfigTab(self):
         """
@@ -132,20 +139,21 @@ class MissionControl(QWidget, GoalAllocator):
         
         self.config_tab.setLayout(layout)
 
-    def load_image(self,image_path = str):
+    def load_image(self, image_path=str):
         """
         Loads and processes an image for the mission.
 
         Args:
             image_path (str): Path to the image file. If "None", a file dialog is opened.
         """
-        if image_path == "None":
+        
+        if image_path == "None" and self.current_state >= stateMachine.ARM:
             self.image_path, _ = QFileDialog.getOpenFileName(self, "Open Image File", "", "Image Files (*.png *.jpg *.jpeg *.bmp)")
             self.current_state = stateMachine.LOAD_CONFIG
             self.set_config()
 
-
-        if self.image_path:
+        if self.image_path and self.current_state >= stateMachine.ARM:
+            print(self.current_state)
             processed_img, points = edgeDetector.process_image(self.image_path, self.get_drone_number())
             self.map_goal_point([480, 480], points)
             resized = cv2.resize(processed_img, (480, 480), interpolation=cv2.INTER_AREA)
@@ -155,6 +163,9 @@ class MissionControl(QWidget, GoalAllocator):
             self.image_label.setPixmap(pixmap)
             self.log_message("Image loaded")
             self.current_state = stateMachine.IMAGE_LOADED
+
+        elif self.current_state <= stateMachine.ARM:
+            self.log_message("Arm the drone and try loading the image")
 
         else:
             self.log_message("Image not loaded")
@@ -166,8 +177,7 @@ class MissionControl(QWidget, GoalAllocator):
 
         if (self.current_state == stateMachine.IMAGE_LOADED or self.current_state == stateMachine.EXECUITE)    and self.get_current_drone_count() == self.get_drone_number():
             self.current_state = stateMachine.EXECUITE
-            self.update_subscribers()
-            self.execuite_formation()
+            self.execute_formation()
             self.log_message("Mission executed")
             
         elif self.current_state < stateMachine.IMAGE_LOADED:
@@ -175,7 +185,20 @@ class MissionControl(QWidget, GoalAllocator):
         else :
             self.log_message("Drone count mismatch")
 
+    def arm_drones(self):
+        """
+        Arm the drones.
+        """
+        if self.current_state == stateMachine.INIT_UI:
+            if self.get_current_drone_count() == self.get_drone_number():
+                self.log_message("Drones armed")
+                self.set_initial_goal()
+                self.current_state = stateMachine.ARM
+            else :
+                self.log_message("Drones count mismatch")
 
+        else :
+            self.log_message("Drones already armed")
 
     def set_config(self):
         """
@@ -196,7 +219,6 @@ class MissionControl(QWidget, GoalAllocator):
 
         if self.current_state == stateMachine.IMAGE_LOADED or self.current_state == stateMachine.EXECUITE:
             self.load_image(self.image_path)
-
 
     def show_message(self, title, text, icon):
         """
