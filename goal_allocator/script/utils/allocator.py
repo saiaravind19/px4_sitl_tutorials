@@ -7,6 +7,7 @@ from mavros_msgs.msg import HomePosition
 from geometry_msgs.msg import Point,PoseStamped
 from nav_msgs.msg import Odometry
 from goal_allocator.srv import goal
+from std_srvs.srv import Empty
 import numpy as np
 import math
 import rosservice
@@ -60,6 +61,33 @@ class GoalAllocator():
             if drone in self.drone_pose_dict:
                 local_home_transform = self.drone_pose_dict[drone].global2local_transformation
                 self.drone_home_publisher[drone].publish(local_home_transform)
+
+    def set_initial_goal(self):
+        service_list = rosservice.get_service_list()
+
+        for drone in self.namespace:
+            goal_point = Point()
+            goal_point.x = self.drone_pose_dict[drone].global2local_transformation.x
+            goal_point.y = self.drone_pose_dict[drone].global2local_transformation.y
+            goal_point.z = 5
+            self.drone_pose_dict[drone].goal_point = goal_point
+
+            # Check if the service exists before calling it
+            goal_update = '/' + drone + '/goal_update'
+            # Wait for the service to become available (optional)
+            if goal_update in service_list:
+                try:
+                    rospy.loginfo("initial goal for drone %s. Goal: x: %f, y: %f ,z: %f", drone, goal_point.x,goal_point.y,goal_point.z)
+                    response = self.goal_allocator_service[drone](self.drone_pose_dict[drone].goal_point)
+                    rospy.loginfo("Service call successful for drone %s. Response: %s", drone, response)
+
+                    arm_service = rospy.ServiceProxy('/' + drone + '/arm_and_offboard',Empty)
+                    response = arm_service()
+                    rospy.loginfo("Arm and offboard call successful for drone %s. Response: %s", drone, response)
+
+                except rospy.ServiceException as e:
+                    rospy.logerr("Service call failed for drone %s: %s", drone, str(e))
+
 
 
     def set_min_bound(self, bound: list) -> None:
@@ -116,7 +144,7 @@ class GoalAllocator():
                 self.drone_pose_dict[drone] = drone_state()
                 self.local_pose_subscriber.append(
                     rospy.Subscriber(
-                        drone + '/mavros/local_position/odom',
+                        drone + '/local_pose_transform/odom',
                         Odometry,
                         lambda msg, drone=drone: self.local_odom_callback(msg, drone),
                         queue_size=10
@@ -132,6 +160,8 @@ class GoalAllocator():
                 self.drone_home_publisher[drone] = rospy.Publisher(drone + '/local_home_transform',Point,queue_size=10)
         
         rate = rospy.Rate(50)
+
+        ## bug crashed of there is no subscriber
         while len(self.drone_home_subscriber) != 0:
             rate.sleep()
         
@@ -151,8 +181,8 @@ class GoalAllocator():
         """
         x, y, z = pymap3d.geodetic2enu(current_coordinate.latitude, current_coordinate.longitude, relative_coordinate.altitude, relative_coordinate.latitude, relative_coordinate.longitude, current_coordinate.altitude)
         enu_frame = Point()
-        enu_frame.x = round(x, 3)
-        enu_frame.y = round(y, 3)
+        enu_frame.x = -1*round(x, 3)
+        enu_frame.y = -1*round(y, 3)
         enu_frame.z = round(z, 3)
         return enu_frame
 
@@ -189,6 +219,7 @@ class GoalAllocator():
             scaled_point.y = self.__min_bound[1] + (point[0] / shape[1]) * self.__max_bound[1]
             scaled_point.z = 0 
             self.goal_point_list.append(self.transform_to_yz(scaled_point))
+        print(self.goal_point_list)
 
     def transform_to_yz(self, point: Point) -> Point:
         """
@@ -227,10 +258,12 @@ class GoalAllocator():
             if drone in drone_list:
                 drone_list.remove(drone)
 
-            self.drone_pose_dict[drone].goal_point.x = goal.x + self.drone_pose_dict[drone].global2local_transformation.x
-            self.drone_pose_dict[drone].goal_point.y = goal.y + self.drone_pose_dict[drone].global2local_transformation.y
-            self.drone_pose_dict[drone].goal_point.z = goal.z + self.drone_pose_dict[drone].global2local_transformation.z
+            self.drone_pose_dict[drone].goal_point.x = goal.x #+ self.drone_pose_dict[drone].global2local_transformation.x
+            self.drone_pose_dict[drone].goal_point.y = goal.y #+ self.drone_pose_dict[drone].global2local_transformation.y
+            self.drone_pose_dict[drone].goal_point.z = goal.z #+ self.drone_pose_dict[drone].global2local_transformation.z
             rospy.loginfo("Drone ID: %s goal assigned: x: %.2f , y: %.2f , z : %.2f", drone, self.drone_pose_dict[drone].goal_point.x, self.drone_pose_dict[drone].goal_point.y, self.drone_pose_dict[drone].goal_point.z)
+    
+
     
     def send_goal(self) -> None:
         """

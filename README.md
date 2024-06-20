@@ -16,6 +16,7 @@ For a detailed explanation on how to get started with the basics of PX4, please 
     - Mission control UI for taking input from user.
     - Setting user defined configuration in run time.
     - Drone formation depecting the image input given by the user.
+    - [ORCA](https://gamma.cs.unc.edu/ORCA/) based collision avoidance during formation. 
 - Utilize a bash script to effortlessly spawn Multiple drones within the Gazebo simulation environment.
 
 

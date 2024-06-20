@@ -38,7 +38,7 @@ namespace collision_avoider
                 {
                     struct plane_data current_drone_data = collector->get_drone_odom(drone_id[i]);
                     simulator->setAgentPosition(current_drone_data.agent_id,current_drone_data.position);
-                    ROS_INFO("Drone id : %d psoition X :%f Y: %f Z: %f",current_drone_data.agent_id,current_drone_data.position[0],current_drone_data.position[1],current_drone_data.position[2]);
+                    //ROS_INFO("Drone id : %s Agent id : %d psoition X :%f Y: %f Z: %f",drone_id[i].c_str(),current_drone_data.agent_id,current_drone_data.position[0],current_drone_data.position[1],current_drone_data.position[2]);
                     simulator->setAgentVelocity(current_drone_data.agent_id,current_drone_data.linear_vel);
 
                 }
@@ -56,12 +56,11 @@ namespace collision_avoider
     {   
         try{
 
-            ROS_WARN("namespace :%s agent id : %ld ",drone_namespace.c_str(),current_agent_id);
             
             struct plane_data current_drone_data = collector->get_drone_odom(drone_namespace);
             RVO::Vector3 current_goal   = collector->get_current_drone_goal(); 
             RVO::Vector3 goalVector     = collector->get_current_drone_goal() - current_drone_data.position;
-            ROS_INFO("current goal : x:%f y:%f z:%f",current_goal[0],current_goal[1],current_goal[2]);
+            ROS_INFO_THROTTLE(10,"Drone id %s current goal : x:%f y:%f z:%f",drone_namespace.c_str(),current_goal[0],current_goal[1],current_goal[2]);
 
             //if (RVO::absSq(goalVector) > 1.0F) {
             //  goalVector = RVO::normalize(goalVector);

@@ -57,8 +57,8 @@ namespace collision_avoider{
         
         private:
             void pub_computed_vel();
-            const float   neighbourDistance = 10.0;
-            const int     maxNeighbour = 10;
+            const float   neighbourDistance = 2.5;
+            const int     maxNeighbour = 6;
             const float   timeHorizon = 5.0;
             const float   timeHorizonObstacles = 5.0;
             const float   radius = 2.0;
@@ -79,6 +79,7 @@ namespace collision_avoider{
     extern std::shared_ptr<ros::NodeHandle> collision_avoider_node;
     extern std::shared_ptr<collision_avoider::pose_collector> collector;
     extern std::shared_ptr<collision_avoider::collision_avoider_algo> rvo_obj;
+    bool waitForPublisher(const std::string& topic_name);
 
     void init_all();
     

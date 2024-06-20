@@ -50,11 +50,11 @@ include_directories(
 )
 
 
-add_executable(position_controller src/pose_controller.cpp)
-target_link_libraries(position_controller ${catkin_LIBRARIES})
+add_executable(state_manager src/state_manager.cpp)
+target_link_libraries(state_manager ${catkin_LIBRARIES})
 
 install(TARGETS
-  position_controller
+  state_manager
   #ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   #LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}

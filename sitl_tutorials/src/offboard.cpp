@@ -59,7 +59,17 @@ int main(int argc, char **argv)
 
     while(ros::ok()){
 
-        if( current_state.mode != "OFFBOARD" &&
+        if (!current_state.armed && ros::Time::now() - last_request > ros::Duration(5.0))
+        { 
+                if( arming_client.call(arm_cmd) &&
+                    arm_cmd.response.success){
+                    ROS_INFO("Vehicle armed");
+                }
+                last_request = ros::Time::now();
+
+        }
+
+        if( current_state.armed && current_state.mode != "OFFBOARD" &&
             (ros::Time::now() - last_request > ros::Duration(5.0) )){
             if( arming_client.call(arm_cmd) &&
                 arm_cmd.response.success){
@@ -72,16 +82,7 @@ int main(int argc, char **argv)
             }
 
             last_request = ros::Time::now();
-        } /*else {
-            if( !current_state.armed &&
-                (ros::Time::now() - last_request > ros::Duration(5.0)) ){
-                if( arming_client.call(arm_cmd) &&
-                    arm_cmd.response.success){
-                    ROS_INFO("Vehicle armed");
-                }
-                last_request = ros::Time::now();
-            }
-        }*/
+        } 
 
         local_pos_pub.publish(pose);
 

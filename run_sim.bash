@@ -1,14 +1,5 @@
 #!/bin/bash
 
-read -p "Please enter number of drones to be spawned: " user_input
-user_input=${user_input:-10}
-module=4
-namespace="iris_"
-counter=0
-pose_x=0
-process_list=""
-
-
 # Function to handle SIGINT (Ctrl+C)
 cleanup() {
     echo "Ctrl+C detected. Cleaning up..."
@@ -20,16 +11,30 @@ cleanup() {
     exit 1
 }
 
-# Check if the input is a valid integer
-if [[ $user_input =~ ^[0-9]+$ ]]; then
-    echo "You entered: $user_input"
+# Prompt for the number of drones to be spawned
+read -p "Please enter number of drones to be spawned [default: 2]: " user_input
+user_input=${user_input:-2}
+read -p "Please enter the module number (1-3) [default: 1]: " module 
+module=${module:-1}
+
+# Check if the module is within the valid range
+if [[ $module =~ ^[1-3]$ ]]; then
+    echo "You selected module: $module"
 else
-    echo "Invalid input. Please enter a valid integer."
+    echo "Invalid module. Please enter a number between 1 and 3."
     exit 1
 fi
 
+namespace="iris_"
+counter=0
+pose_x=0
+process_list=""
 
+# Trap SIGINT and call the cleanup function
+trap cleanup SIGINT
 
+roslaunch sitl_tutorials spawn_gazebo_world.launch & 
+sleep 5
 
 while [ $counter -le $user_input ]
 do 
@@ -46,11 +51,7 @@ do
     ((pose_x++))
 done
 
-
-# Trap SIGINT and call the cleanup function
-trap cleanup SIGINT
-
 # Wait for Ctrl+C to be pressed
 echo "Waiting for Ctrl+C..."
 wait $process_list
-echo "All process are killed successfully"
+echo "All processes are killed successfully"

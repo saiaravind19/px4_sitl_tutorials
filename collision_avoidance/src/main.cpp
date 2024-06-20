@@ -6,25 +6,25 @@ namespace collision_avoider
   std::shared_ptr<pose_collector> collector;
   std::shared_ptr<collision_avoider_algo> rvo_obj;
 
-
   void init_all()
   {
+    collision_avoider_node = std::make_shared<ros::NodeHandle>();
+    collector = std::make_shared<collision_avoider::pose_collector>();
 
-  collision_avoider_node = std::make_shared<ros::NodeHandle>();
-  collector = std::make_shared<collision_avoider::pose_collector>();
-  rvo_obj = std::make_shared<collision_avoider::collision_avoider_algo>();
+    rvo_obj = std::make_shared<collision_avoider::collision_avoider_algo>();
 
-  
   }
   
-  pose_collector::pose_collector(){
+  pose_collector::pose_collector(){  
+
+    // drone id and drone namespace are same and interchangale accross the code 
+
     update_goal_server = collision_avoider_node->advertiseService("goal_update", &pose_collector::update_goal_service_callback,this);
-    namespace_timer = collision_avoider_node->createTimer(ros::Duration(5), &pose_collector::update_subscribers,this);
     drone_namespace = collision_avoider_node->getNamespace();
     drone_namespace = drone_namespace.erase(0,1);
+    namespace_timer = collision_avoider_node->createTimer(ros::Duration(5), &pose_collector::update_subscribers,this);
 
   }
-
   std::vector<std::string> pose_collector::getall_drone_ids(){
     return namespace_list;
   }
@@ -61,7 +61,6 @@ namespace collision_avoider
   {
     RVO::Vector3 pose = {odom.pose.pose.position.x,odom.pose.pose.position.y,odom.pose.pose.position.z};
     RVO::Vector3 velocity = {odom.twist.twist.linear.x,odom.twist.twist.linear.y,odom.twist.twist.linear.z};
-
     all_plane_data[drone_id].position = pose;
     all_plane_data[drone_id].linear_vel = velocity;
 
@@ -90,18 +89,14 @@ namespace collision_avoider
               std::string drone_id = substring_array.at(1);
               
               
-              if (std::count(namespace_list.begin(),namespace_list.end(),drone_id) ==0 ){
+              if (std::count(namespace_list.begin(),namespace_list.end(),drone_id) ==0 )
+              {
                 
                 local_odom_sub_list[drone_id] = collision_avoider_node->subscribe<nav_msgs::Odometry>('/'+drone_id+"/local_pose_transform/odom", 10,[this, drone_id](const nav_msgs::Odometry::ConstPtr& odom) {
                     this->local_odom_callback(*odom, drone_id);}
                 );
                 
                 namespace_list.push_back(drone_id);
-                if (drone_id == drone_namespace){
-                  current_local_goal_pose[0] = all_plane_data[drone_id].position[0];
-                  current_local_goal_pose[1] = all_plane_data[drone_id].position[1];
-                  current_local_goal_pose[2] = 5;
-                }
                 all_plane_data[drone_id].agent_id = rvo_obj->add_agent(drone_id,all_plane_data[drone_id]);
                 ROS_INFO("Appending %s namespace to the vector list",drone_id.c_str());
                 ROS_INFO("RVO agent ID for drone_id: %s is %d",drone_id.c_str(),all_plane_data[drone_id].agent_id);
