@@ -193,7 +193,7 @@ class GoalAllocator():
         """
         for drone in self.drone_pose_dict:
             self.drone_pose_dict[drone].global2local_transformation = self.gps_to_enu(self.global_home_pose, self.drone_pose_dict[drone].drone_home_pose)
-            rospy.loginfo("set home trans Drone: %s : x: %.2f , y: %.2f , z : %.2f", drone, self.drone_pose_dict[drone].global2local_transformation.x, self.drone_pose_dict[drone].global2local_transformation.y, self.drone_pose_dict[drone].global2local_transformation.z)
+            rospy.loginfo_throttle(10,"local2global transformation for drone: %s : x: %.2f , y: %.2f , z : %.2f", drone, self.drone_pose_dict[drone].global2local_transformation.x, self.drone_pose_dict[drone].global2local_transformation.y, self.drone_pose_dict[drone].global2local_transformation.z)
 
     def home_pose_callback(self, msg: HomePosition, drone_id: str) -> None:
         """

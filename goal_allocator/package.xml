@@ -47,7 +47,7 @@
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
-    <cpp cflags="-I${prefix}/srv/cpp"/>
+
 
     <!-- Other tools can request additional information be placed here -->
   </export>
