@@ -33,7 +33,7 @@ process_list=""
 # Trap SIGINT and call the cleanup function
 trap cleanup SIGINT
 
-roslaunch sitl_tutorials spawn_gazebo_world.launch & 
+roslaunch sitl_tutorials spawn_gazebo_world.launch module:=$module& 
 sleep 5
 
 while [ $counter -le $user_input ]

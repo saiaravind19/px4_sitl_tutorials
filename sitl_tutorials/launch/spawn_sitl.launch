@@ -10,8 +10,7 @@
     <arg name="pose_y" default="0"/> <!-- Initial y-coordinate position of the UAV -->
     <arg name="pose_z" default="0"/> <!-- Initial z-coordinate position of the UAV -->
 
-    <!--node name="goal_allocator" pkg="goal_allocator" type="app.py" output="screen"/-->
-
+    
     <group ns="$(arg uav_name)">
         <!-- MAVROS and vehicle configs -->
         <arg name="remote_port" value="$(eval 14540 + ID)"/>

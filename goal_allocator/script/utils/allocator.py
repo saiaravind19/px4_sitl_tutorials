@@ -139,41 +139,42 @@ class GoalAllocator():
         
         # Extract the namespaces from the list
         namespace = [topic.split('/')[1] for topic in local_pose_odom_list if len(topic.split('/')) > 4]
-        for drone in namespace:
-            if drone not in self.drone_pose_dict:
-                self.drone_pose_dict[drone] = drone_state()
-                self.local_pose_subscriber.append(
-                    rospy.Subscriber(
-                        drone + '/local_pose_transform/odom',
-                        Odometry,
-                        lambda msg, drone=drone: self.local_odom_callback(msg, drone),
-                        queue_size=10
+        if len(namespace) > 0:
+            for drone in namespace:
+                if drone not in self.drone_pose_dict:
+                    self.drone_pose_dict[drone] = drone_state()
+                    self.local_pose_subscriber.append(
+                        rospy.Subscriber(
+                            drone + '/local_pose_transform/odom',
+                            Odometry,
+                            lambda msg, drone=drone: self.local_odom_callback(msg, drone),
+                            queue_size=10
+                        )
                     )
-                )
 
-                self.drone_home_subscriber[drone] = rospy.Subscriber(
-                    drone + '/mavros/home_position/home',
-                    HomePosition,
-                    lambda msg, drone=drone: self.home_pose_callback(msg, drone),
-                    queue_size=5
-                )
-                self.drone_home_publisher[drone] = rospy.Publisher(drone + '/local_home_transform',Point,queue_size=10)
-        
-        rate = rospy.Rate(50)
+                    self.drone_home_subscriber[drone] = rospy.Subscriber(
+                        drone + '/mavros/home_position/home',
+                        HomePosition,
+                        lambda msg, drone=drone: self.home_pose_callback(msg, drone),
+                        queue_size=5
+                    )
+                    self.drone_home_publisher[drone] = rospy.Publisher(drone + '/local_home_transform',Point,queue_size=10)
 
-        ## bug crashed of there is no subscriber
-        while len(self.drone_home_subscriber) != 0:
-            rate.sleep()
-        
-        for drone in namespace:
-            if drone not in self.goal_allocator_service:
-                self.goal_allocator_service[drone] = rospy.ServiceProxy(
-                    '/' + drone + '/goal_update',
-                    goal
-                )
-        self.namespace = namespace
-        self.global_home_pose = self.drone_pose_dict[self.namespace[0]].drone_home_pose
-        self.compute_localcoordinate()
+            rate = rospy.Rate(50)
+
+            ## bug crashed of there is no subscriber
+            while len(self.drone_home_subscriber) != 0:
+                rate.sleep()
+
+            for drone in namespace:
+                if drone not in self.goal_allocator_service:
+                    self.goal_allocator_service[drone] = rospy.ServiceProxy(
+                        '/' + drone + '/goal_update',
+                        goal
+                    )
+            self.namespace = namespace
+            self.global_home_pose = self.drone_pose_dict[self.namespace[0]].drone_home_pose
+            self.compute_localcoordinate()
 
     def gps_to_enu(self, current_coordinate: GeoPoint, relative_coordinate: GeoPoint) -> Point:
         """
@@ -219,7 +220,6 @@ class GoalAllocator():
             scaled_point.y = self.__min_bound[1] + (point[0] / shape[1]) * self.__max_bound[1]
             scaled_point.z = 0 
             self.goal_point_list.append(self.transform_to_yz(scaled_point))
-        print(self.goal_point_list)
 
     def transform_to_yz(self, point: Point) -> Point:
         """
