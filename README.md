@@ -22,4 +22,4 @@ For a detailed explanation on how to get started with the basics of PX4, please 
 
 ## Video Demo
 
-[![Project Demo](https://img.youtube.com/vi/TD-ApT3Auv8/0.jpg)](https://www.youtube.com/watch?v=TD-ApT3Auv8)
+[![Project Demo](https://img.youtube.com/vi/TD-ApT3Auv8/0.jpg)](https://youtu.be/PH_vu_SqwpU?si=0XmXPGxN_7SC7QhE)
